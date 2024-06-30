@@ -22,7 +22,6 @@ use steamlocate::SteamDir;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_log::{Target, TargetKind};
 use tauri_specta::Event;
-// use tauri_plugin_log::Target;
 
 mod analytics;
 mod app_state;
@@ -53,37 +52,13 @@ mod windows;
 
 #[tauri::command]
 #[specta::specta]
-async fn get_mod_loaders(handle: AppHandle) -> Result<mod_loader::DataMap> {
-	mod_loader::get_data_map(&handle.app_state().mod_loaders.get_data()?)
-}
-
-fn update_state<TData, TEvent>(
-	event: TEvent,
-	data: TData,
-	mutex: &Mutex<Option<TData>>,
-	handle: &AppHandle,
-) where
-	TEvent: tauri_specta::Event + std::clone::Clone + serde::Serialize,
-{
-	if let Ok(mut mutex_guard) = mutex.lock() {
-		*mutex_guard = Some(data);
-	}
-
-	// Sends a signal to make the frontend request an app state refresh.
-	// I would have preferred to just send the state with the signal,
-	// but it seems like Tauri events are really slow for large data.
-	event.emit(handle);
-}
-
-#[tauri::command]
-#[specta::specta]
-async fn open_game_folder(installed_game: InstalledGame, handle: AppHandle) -> Result {
+async fn open_game_folder(installed_game: InstalledGame) -> Result {
 	installed_game.open_game_folder()
 }
 
 #[tauri::command]
 #[specta::specta]
-async fn open_game_mods_folder(installed_game: InstalledGame, handle: AppHandle) -> Result {
+async fn open_game_mods_folder(installed_game: InstalledGame) -> Result {
 	installed_game.open_mods_folder()
 }
 
@@ -95,7 +70,7 @@ async fn open_mods_folder() -> Result {
 
 #[tauri::command]
 #[specta::specta]
-async fn open_mod_folder(local_mod: LocalMod, handle: AppHandle) -> Result {
+async fn open_mod_folder(local_mod: LocalMod) -> Result {
 	local_mod.open_folder()
 }
 
@@ -152,7 +127,7 @@ async fn start_game(installed_game: InstalledGame, handle: AppHandle) -> Result 
 
 #[tauri::command]
 #[specta::specta]
-async fn start_game_exe(installed_game: InstalledGame, handle: AppHandle) -> Result {
+async fn start_game_exe(installed_game: InstalledGame) -> Result {
 	installed_game.start_exe()
 }
 
@@ -353,15 +328,12 @@ async fn update_remote_games(handle: AppHandle, provider_map: provider::Map) {
 async fn update_mods(handle: AppHandle, resources_path: PathBuf) {
 	let mod_loaders = mod_loader::get_map(&resources_path);
 
-	update_state(
-		events::SyncModLoaders(mod_loader::get_data_map(&mod_loaders).unwrap()), // TODO handle error.
-		mod_loaders.clone(),
-		&handle.app_state().mod_loaders,
-		&handle,
-	);
-
 	refresh_local_mods(&mod_loaders, &handle);
 	refresh_remote_mods(&mod_loaders, &handle).await;
+
+	if let Ok(mut mutex_guard) = handle.app_state().mod_loaders.lock() {
+		*mutex_guard = Some(mod_loaders);
+	}
 }
 
 #[tauri::command]
@@ -462,7 +434,6 @@ fn main() {
 			)
 			.commands(tauri_specta::collect_commands![
 				update_data,
-				get_mod_loaders,
 				open_game_folder,
 				install_mod,
 				configure_mod,

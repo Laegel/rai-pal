@@ -12,14 +12,6 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async getModLoaders() : Promise<Result<{ [key in string]: ModLoaderData }, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("get_mod_loaders") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async openGameFolder(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
     return { status: "ok", data: await TAURI_INVOKE("open_game_folder", { installedGame }) };
