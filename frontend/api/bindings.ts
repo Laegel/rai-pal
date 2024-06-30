@@ -12,14 +12,6 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async getOwnedGames() : Promise<Result<{ [key in string]: OwnedGame }, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("get_owned_games") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async getModLoaders() : Promise<Result<{ [key in string]: ModLoaderData }, Error>> {
 try {
     return { status: "ok", data: await TAURI_INVOKE("get_mod_loaders") };
@@ -212,9 +204,9 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async runProviderCommand(ownedGameId: string, commandAction: ProviderCommandAction) : Promise<Result<null, Error>> {
+async runProviderCommand(ownedGame: OwnedGame, commandAction: ProviderCommandAction) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("run_provider_command", { ownedGameId, commandAction }) };
+    return { status: "ok", data: await TAURI_INVOKE("run_provider_command", { ownedGame, commandAction }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -229,7 +221,6 @@ foundInstalledGame: FoundInstalledGame,
 foundOwnedGame: FoundOwnedGame,
 foundRemoteGame: FoundRemoteGame,
 gameAdded: GameAdded,
-syncOwnedGames: SyncOwnedGames,
 syncRemoteGames: SyncRemoteGames,
 syncModLoaders: SyncModLoaders,
 syncLocalMods: SyncLocalMods,
@@ -242,7 +233,6 @@ foundInstalledGame: "found-installed-game",
 foundOwnedGame: "found-owned-game",
 foundRemoteGame: "found-remote-game",
 gameAdded: "game-added",
-syncOwnedGames: "sync-owned-games",
 syncRemoteGames: "sync-remote-games",
 syncModLoaders: "sync-mod-loaders",
 syncLocalMods: "sync-local-mods",
@@ -294,7 +284,6 @@ export type RemoteModData = { title: string; deprecated: boolean; author: string
 export type RunnableModData = { path: string; args: string[] }
 export type SyncLocalMods = { [key in string]: LocalMod }
 export type SyncModLoaders = { [key in string]: ModLoaderData }
-export type SyncOwnedGames = { [key in string]: OwnedGame }
 export type SyncRemoteGames = { [key in string]: RemoteGame }
 export type SyncRemoteMods = { [key in string]: RemoteMod }
 export type UnityScriptingBackend = "Il2Cpp" | "Mono"

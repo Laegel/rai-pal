@@ -8,7 +8,6 @@ use crate::{
 };
 
 pub struct AppState {
-	pub owned_games: Mutex<Option<owned_game::Map>>,
 	pub mod_loaders: Mutex<Option<mod_loader::Map>>,
 	pub local_mods: Mutex<Option<local_mod::Map>>,
 	pub remote_mods: Mutex<Option<remote_mod::Map>>,

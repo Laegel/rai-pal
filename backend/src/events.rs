@@ -11,9 +11,6 @@ pub struct FoundInstalledGame(pub installed_game::InstalledGame);
 pub struct GameAdded(pub String);
 
 #[serializable_event]
-pub struct SyncOwnedGames(pub owned_game::Map);
-
-#[serializable_event]
 pub struct FoundOwnedGame(pub owned_game::OwnedGame);
 
 #[serializable_event]
@@ -50,7 +47,6 @@ pub fn collect_events() -> (
 		FoundOwnedGame,
 		FoundRemoteGame,
 		GameAdded,
-		SyncOwnedGames,
 		SyncRemoteGames,
 		SyncModLoaders,
 		SyncLocalMods,

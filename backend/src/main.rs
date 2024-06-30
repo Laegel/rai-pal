@@ -9,6 +9,7 @@ use local_mod::LocalMod;
 use log::error;
 use maps::TryGettable;
 use mod_loaders::mod_loader::{self, ModLoaderActions};
+use owned_game::OwnedGame;
 use paths::{hash_path, normalize_path};
 use providers::{
 	manual_provider,
@@ -48,12 +49,6 @@ mod remote_mod;
 mod result;
 mod steam;
 mod windows;
-
-#[tauri::command]
-#[specta::specta]
-async fn get_owned_games(handle: AppHandle) -> Result<owned_game::Map> {
-	handle.app_state().owned_games.get_data()
-}
 
 #[tauri::command]
 #[specta::specta]
@@ -397,28 +392,13 @@ async fn update_installed_games(handle: AppHandle, provider_map: provider::Map) 
 }
 
 async fn update_owned_games(handle: AppHandle, provider_map: provider::Map) {
-	let owned_games: owned_game::Map = provider_map
-		.iter()
-		.flat_map(|(provider_id, provider)| {
-			match provider.get_owned_games(|game| {
-				events::FoundOwnedGame(game.clone()).emit(&handle);
-			}) {
-				Ok(owned_games) => owned_games,
-				Err(err) => {
-					error!("Failed to get owned games for provider '{provider_id}'. Error: {err}");
-					Vec::default()
-				}
-			}
-		})
-		.map(|owned_game| (owned_game.id.clone(), owned_game))
-		.collect();
-
-	update_state(
-		events::SyncOwnedGames(owned_games.clone()),
-		owned_games,
-		&handle.app_state().owned_games,
-		&handle,
-	);
+	provider_map.iter().for_each(|(provider_id, provider)| {
+		if let Err(err) = provider.get_owned_games(|game| {
+			events::FoundOwnedGame(game.clone()).emit(&handle);
+		}) {
+			error!("Failed to get owned games for provider '{provider_id}'. Error: {err}");
+		}
+	});
 }
 
 async fn update_remote_games(handle: AppHandle, provider_map: provider::Map) {
@@ -504,14 +484,11 @@ async fn add_game(path: PathBuf, handle: AppHandle) -> Result {
 #[tauri::command]
 #[specta::specta]
 async fn run_provider_command(
-	owned_game_id: &str,
+	owned_game: OwnedGame,
 	command_action: ProviderCommandAction,
 	handle: AppHandle,
 ) -> Result {
-	handle
-		.app_state()
-		.owned_games
-		.try_get(owned_game_id)?
+	owned_game
 		.provider_commands
 		.try_get(&command_action)?
 		.run()?;
@@ -562,7 +539,6 @@ fn main() {
 			)
 			.commands(tauri_specta::collect_commands![
 				update_data,
-				get_owned_games,
 				get_mod_loaders,
 				open_game_folder,
 				install_mod,
@@ -616,7 +592,6 @@ fn main() {
 				.build(),
 		)
 		.manage(AppState {
-			owned_games: Mutex::default(),
 			remote_games: Mutex::default(),
 			mod_loaders: Mutex::default(),
 			local_mods: Mutex::default(),
