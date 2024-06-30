@@ -12,14 +12,6 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async getInstalledGames() : Promise<Result<{ [key in string]: InstalledGame }, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("get_installed_games") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async getOwnedGames() : Promise<Result<{ [key in string]: OwnedGame }, Error>> {
 try {
     return { status: "ok", data: await TAURI_INVOKE("get_owned_games") };
@@ -36,73 +28,73 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async openGameFolder(gameId: string) : Promise<Result<null, Error>> {
+async openGameFolder(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("open_game_folder", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("open_game_folder", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async installMod(gameId: string, modId: string) : Promise<Result<null, Error>> {
+async installMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("install_mod", { gameId, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("install_mod", { installedGame, modId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async configureMod(gameId: string, modId: string) : Promise<Result<null, Error>> {
+async configureMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("configure_mod", { gameId, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("configure_mod", { installedGame, modId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async openInstalledModFolder(gameId: string, modId: string) : Promise<Result<null, Error>> {
+async openInstalledModFolder(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("open_installed_mod_folder", { gameId, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("open_installed_mod_folder", { installedGame, modId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async uninstallMod(gameId: string, modId: string) : Promise<Result<null, Error>> {
+async uninstallMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("uninstall_mod", { gameId, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("uninstall_mod", { installedGame, modId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async uninstallAllMods(gameId: string) : Promise<Result<null, Error>> {
+async uninstallAllMods(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("uninstall_all_mods", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("uninstall_all_mods", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async openGameModsFolder(gameId: string) : Promise<Result<null, Error>> {
+async openGameModsFolder(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("open_game_mods_folder", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("open_game_mods_folder", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async startGame(gameId: string) : Promise<Result<null, Error>> {
+async startGame(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("start_game", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("start_game", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async startGameExe(gameId: string) : Promise<Result<null, Error>> {
+async startGameExe(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("start_game_exe", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("start_game_exe", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -156,14 +148,6 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async removeGame(gameId: string) : Promise<Result<null, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("remove_game", { gameId }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async deleteSteamAppinfoCache() : Promise<Result<null, Error>> {
 try {
     return { status: "ok", data: await TAURI_INVOKE("delete_steam_appinfo_cache") };
@@ -212,9 +196,9 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async refreshGame(gameId: string) : Promise<Result<null, Error>> {
+async refreshGame(installedGame: InstalledGame) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("refresh_game", { gameId }) };
+    return { status: "ok", data: await TAURI_INVOKE("refresh_game", { installedGame }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -241,31 +225,29 @@ try {
          /** user-defined events **/
 
 export const events = __makeEvents__<{
-syncInstalledGames: SyncInstalledGames,
 foundInstalledGame: FoundInstalledGame,
 foundOwnedGame: FoundOwnedGame,
 foundRemoteGame: FoundRemoteGame,
+gameAdded: GameAdded,
 syncOwnedGames: SyncOwnedGames,
 syncRemoteGames: SyncRemoteGames,
 syncModLoaders: SyncModLoaders,
 syncLocalMods: SyncLocalMods,
 syncRemoteMods: SyncRemoteMods,
 executedProviderCommand: ExecutedProviderCommand,
-gameAdded: GameAdded,
 gameRemoved: GameRemoved,
 errorRaised: ErrorRaised
 }>({
-syncInstalledGames: "sync-installed-games",
 foundInstalledGame: "found-installed-game",
 foundOwnedGame: "found-owned-game",
 foundRemoteGame: "found-remote-game",
+gameAdded: "game-added",
 syncOwnedGames: "sync-owned-games",
 syncRemoteGames: "sync-remote-games",
 syncModLoaders: "sync-mod-loaders",
 syncLocalMods: "sync-local-mods",
 syncRemoteMods: "sync-remote-mods",
 executedProviderCommand: "executed-provider-command",
-gameAdded: "game-added",
 gameRemoved: "game-removed",
 errorRaised: "error-raised"
 })
@@ -283,7 +265,7 @@ export type EngineBrand = "Unity" | "Unreal" | "Godot" | "GameMaker"
 export type EngineVersion = { numbers: EngineVersionNumbers; suffix: string | null; display: string }
 export type EngineVersionNumbers = { major: number; minor: number | null; patch: number | null }
 export type EngineVersionRange = { minimum: EngineVersionNumbers | null; maximum: EngineVersionNumbers | null }
-export type Error = "NotImplemented" | "Io" | "GlobPattern" | "Glob" | "Reqwest" | "Goblin" | "SteamLocate" | "Zip" | "Tauri" | "Json" | "ChronoParse" | "SQLite" | "Env" | "TaskJoin" | "UrlEncode" | "HeaderToStr" | "TryFromInt" | { InvalidBinaryVdfType: [number, string] } | { AppDataNotFound: [] } | { PathParseFailure: string } | { PathParentNotFound: string } | { EmptyFile: string } | { AppInfoNotFound: string } | { FailedToParseUnityVersionAsset: string } | { ModInstallInfoInsufficient: [string, string] } | { EmptyStateData: [] } | { FailedToAccessStateData: string } | { FailedToGetGameFromPath: string } | { GameAlreadyAdded: string } | { DataEntryNotFound: string } | { UnityBackendUnknown: string } | { ModDownloadNotAvailable: string } | { RunnableManifestNotFound: string } | { CantRunNonRunnable: string }
+export type Error = "Io" | "GlobPattern" | "Glob" | "Reqwest" | "Goblin" | "SteamLocate" | "Zip" | "Tauri" | "Json" | "ChronoParse" | "SQLite" | "Env" | "TaskJoin" | "UrlEncode" | "HeaderToStr" | "TryFromInt" | { InvalidBinaryVdfType: [number, string] } | { AppDataNotFound: [] } | { PathParseFailure: string } | { PathParentNotFound: string } | { EmptyFile: string } | { AppInfoNotFound: string } | { FailedToParseUnityVersionAsset: string } | { ModInstallInfoInsufficient: [string, string] } | { EmptyStateData: [] } | { FailedToAccessStateData: string } | { FailedToGetGameFromPath: string } | { GameAlreadyAdded: string } | { DataEntryNotFound: string } | { UnityBackendUnknown: string } | { ModDownloadNotAvailable: string } | { RunnableManifestNotFound: string } | { CantRunNonRunnable: string }
 export type ErrorRaised = string
 export type ExecutedProviderCommand = null
 export type FoundInstalledGame = InstalledGame
@@ -310,7 +292,6 @@ export type RemoteGame = { id: string; engine: GameEngine | null; skipCache: boo
 export type RemoteMod = { common: CommonModData; data: RemoteModData }
 export type RemoteModData = { title: string; deprecated: boolean; author: string; sourceCode: string; description: string; latestVersion: ModDownload | null }
 export type RunnableModData = { path: string; args: string[] }
-export type SyncInstalledGames = { [key in string]: InstalledGame }
 export type SyncLocalMods = { [key in string]: LocalMod }
 export type SyncModLoaders = { [key in string]: ModLoaderData }
 export type SyncOwnedGames = { [key in string]: OwnedGame }

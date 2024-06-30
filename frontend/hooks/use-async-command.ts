@@ -1,9 +1,10 @@
+import { Result } from "@api/bindings";
 import { showAppNotification } from "@components/app-notifications";
 import { useCallback, useRef, useState } from "react";
 
-export function useAsyncCommand<TResult, TArgs = void>(
-	command: (args: TArgs) => Promise<TResult>,
-	onSuccess?: (result: TResult) => void,
+export function useAsyncCommand<TResultData, TError, TArgs = void>(
+	command: (args: TArgs) => Promise<Result<TResultData, TError>>,
+	onSuccess?: (result: TResultData) => void,
 ) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
@@ -20,14 +21,18 @@ export function useAsyncCommand<TResult, TArgs = void>(
 
 			return command(args)
 				.then((result) => {
-					if (onSuccess) {
-						onSuccess(result);
+					if (result.status == "ok") {
+						if (onSuccess) {
+							onSuccess(result.data);
+						}
+						setSuccess(true);
+						timeout.current = setTimeout(() => {
+							setSuccess(false);
+						}, 1000);
+						return result.data;
+					} else {
+						throw result.error;
 					}
-					setSuccess(true);
-					timeout.current = setTimeout(() => {
-						setSuccess(false);
-					}, 1000);
-					return result;
 				})
 				.catch((error) =>
 					showAppNotification(`Failed to execute command: ${error}`, "error"),
