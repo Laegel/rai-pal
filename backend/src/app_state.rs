@@ -7,7 +7,6 @@ use crate::{local_mod, maps::TryGettable, mod_loaders::mod_loader, remote_mod, E
 pub struct AppState {
 	pub mod_loaders: Mutex<Option<mod_loader::Map>>,
 	pub local_mods: Mutex<Option<local_mod::Map>>,
-	pub remote_mods: Mutex<Option<remote_mod::Map>>,
 }
 
 type TauriState<'a> = tauri::State<'a, AppState>;
