@@ -28,33 +28,33 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async installMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
+async installMod(installedGame: InstalledGame, localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("install_mod", { installedGame, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("install_mod", { installedGame, localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async configureMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
+async configureMod(installedGame: InstalledGame, localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("configure_mod", { installedGame, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("configure_mod", { installedGame, localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async openInstalledModFolder(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
+async openInstalledModFolder(installedGame: InstalledGame, localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("open_installed_mod_folder", { installedGame, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("open_installed_mod_folder", { installedGame, localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async uninstallMod(installedGame: InstalledGame, modId: string) : Promise<Result<null, Error>> {
+async uninstallMod(installedGame: InstalledGame, localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("uninstall_mod", { installedGame, modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("uninstall_mod", { installedGame, localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -92,33 +92,33 @@ try {
     else return { status: "error", error: e  as any };
 }
 },
-async openModFolder(modId: string) : Promise<Result<null, Error>> {
+async openModFolder(localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("open_mod_folder", { modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("open_mod_folder", { localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async downloadMod(modId: string) : Promise<Result<null, Error>> {
+async downloadMod(remoteMod: RemoteMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("download_mod", { modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("download_mod", { remoteMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async runRunnableWithoutGame(modId: string) : Promise<Result<null, Error>> {
+async runRunnableWithoutGame(localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("run_runnable_without_game", { modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("run_runnable_without_game", { localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async deleteMod(modId: string) : Promise<Result<null, Error>> {
+async deleteMod(localMod: LocalMod) : Promise<Result<null, Error>> {
 try {
-    return { status: "ok", data: await TAURI_INVOKE("delete_mod", { modId }) };
+    return { status: "ok", data: await TAURI_INVOKE("delete_mod", { localMod }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -151,22 +151,6 @@ try {
 async frontendReady() : Promise<Result<null, Error>> {
 try {
     return { status: "ok", data: await TAURI_INVOKE("frontend_ready") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getLocalMods() : Promise<Result<{ [key in string]: LocalMod }, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("get_local_mods") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getRemoteMods() : Promise<Result<{ [key in string]: RemoteMod }, Error>> {
-try {
-    return { status: "ok", data: await TAURI_INVOKE("get_remote_mods") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -213,6 +197,7 @@ foundInstalledGame: FoundInstalledGame,
 foundOwnedGame: FoundOwnedGame,
 foundRemoteGame: FoundRemoteGame,
 gameAdded: GameAdded,
+syncRemoteGames: SyncRemoteGames,
 syncModLoaders: SyncModLoaders,
 syncLocalMods: SyncLocalMods,
 syncRemoteMods: SyncRemoteMods,
@@ -224,6 +209,7 @@ foundInstalledGame: "found-installed-game",
 foundOwnedGame: "found-owned-game",
 foundRemoteGame: "found-remote-game",
 gameAdded: "game-added",
+syncRemoteGames: "sync-remote-games",
 syncModLoaders: "sync-mod-loaders",
 syncLocalMods: "sync-local-mods",
 syncRemoteMods: "sync-remote-mods",
@@ -274,6 +260,7 @@ export type RemoteModData = { title: string; deprecated: boolean; author: string
 export type RunnableModData = { path: string; args: string[] }
 export type SyncLocalMods = { [key in string]: LocalMod }
 export type SyncModLoaders = { [key in string]: ModLoaderData }
+export type SyncRemoteGames = { [key in string]: RemoteGame }
 export type SyncRemoteMods = { [key in string]: RemoteMod }
 export type UnityScriptingBackend = "Il2Cpp" | "Mono"
 

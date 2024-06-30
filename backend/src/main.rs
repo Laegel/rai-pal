@@ -57,12 +57,6 @@ async fn get_mod_loaders(handle: AppHandle) -> Result<mod_loader::DataMap> {
 	mod_loader::get_data_map(&handle.app_state().mod_loaders.get_data()?)
 }
 
-#[tauri::command]
-#[specta::specta]
-async fn get_local_mods(handle: AppHandle) -> Result<local_mod::Map> {
-	handle.app_state().local_mods.get_data()
-}
-
 fn update_state<TData, TEvent>(
 	event: TEvent,
 	data: TData,
@@ -101,8 +95,8 @@ async fn open_mods_folder() -> Result {
 
 #[tauri::command]
 #[specta::specta]
-async fn open_mod_folder(mod_id: &str, handle: AppHandle) -> Result {
-	handle.app_state().local_mods.try_get(mod_id)?.open_folder()
+async fn open_mod_folder(local_mod: LocalMod, handle: AppHandle) -> Result {
+	local_mod.open_folder()
 }
 
 #[tauri::command]
@@ -133,9 +127,8 @@ async fn download_mod(remote_mod: RemoteMod, handle: AppHandle) -> Result {
 
 #[tauri::command]
 #[specta::specta]
-async fn delete_mod(mod_id: &str, handle: AppHandle) -> Result {
+async fn delete_mod(local_mod: LocalMod, handle: AppHandle) -> Result {
 	let state = handle.app_state();
-	let local_mod = state.local_mods.try_get(mod_id)?;
 	let mod_loaders = state.mod_loaders.get_data()?;
 
 	mod_loaders
@@ -298,12 +291,7 @@ fn refresh_local_mods(mod_loaders: &mod_loader::Map, handle: &AppHandle) -> loca
 		.flatten()
 		.collect();
 
-	update_state(
-		events::SyncLocalMods(local_mods.clone()),
-		local_mods.clone(),
-		&handle.app_state().local_mods,
-		handle,
-	);
+	events::SyncLocalMods(local_mods.clone()).emit(handle);
 
 	local_mods
 }
@@ -492,7 +480,6 @@ fn main() {
 				add_game,
 				delete_steam_appinfo_cache,
 				frontend_ready,
-				get_local_mods,
 				open_mod_loader_folder,
 				refresh_game,
 				open_logs_folder,
@@ -526,7 +513,6 @@ fn main() {
 		)
 		.manage(AppState {
 			mod_loaders: Mutex::default(),
-			local_mods: Mutex::default(),
 		})
 		.setup(|app| {
 			register_events(app);
