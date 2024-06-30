@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{borrow::BorrowMut, collections::HashMap, path::PathBuf, sync::Mutex};
+use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 
 use app_state::{AppState, DataValue, StateData, StatefulHandle};
 use installed_game::InstalledGame;
@@ -10,7 +10,7 @@ use log::error;
 use maps::TryGettable;
 use mod_loaders::mod_loader::{self, ModLoaderActions};
 use owned_game::OwnedGame;
-use paths::{hash_path, normalize_path};
+use paths::normalize_path;
 use providers::{
 	manual_provider,
 	provider::{self, ProviderActions},
@@ -66,12 +66,6 @@ async fn get_local_mods(handle: AppHandle) -> Result<local_mod::Map> {
 #[specta::specta]
 async fn get_remote_mods(handle: AppHandle) -> Result<remote_mod::Map> {
 	handle.app_state().remote_mods.get_data()
-}
-
-#[tauri::command]
-#[specta::specta]
-async fn get_remote_games(handle: AppHandle) -> Result<remote_game::Map> {
-	handle.app_state().remote_games.get_data()
 }
 
 fn update_state<TData, TEvent>(
@@ -402,29 +396,18 @@ async fn update_owned_games(handle: AppHandle, provider_map: provider::Map) {
 }
 
 async fn update_remote_games(handle: AppHandle, provider_map: provider::Map) {
-	let remote_games: remote_game::Map =
-		futures::future::join_all(provider_map.values().map(|provider| {
-			provider.get_remote_games(|remote_game| {
-				events::FoundRemoteGame(remote_game.clone()).emit(&handle);
-			})
-		}))
-		.await
-		.into_iter()
-		.flat_map(|result| {
-			result.unwrap_or_else(|err| {
-				error!("Failed to get remote games for a provider: {err}");
-				Vec::default()
-			})
+	futures::future::join_all(provider_map.values().map(|provider| {
+		provider.get_remote_games(|remote_game| {
+			events::FoundRemoteGame(remote_game.clone()).emit(&handle);
 		})
-		.map(|remote_game| (remote_game.id.clone(), remote_game))
-		.collect();
-
-	update_state(
-		events::SyncRemoteGames(remote_games.clone()),
-		remote_games,
-		&handle.app_state().remote_games,
-		&handle,
-	);
+	}))
+	.await
+	.into_iter()
+	.for_each(|result| {
+		if let Err(err) = result {
+			error!("Failed to get remote games for a provider: {err}");
+		}
+	});
 }
 
 async fn update_mods(handle: AppHandle, resources_path: PathBuf) {
@@ -559,7 +542,6 @@ fn main() {
 				frontend_ready,
 				get_local_mods,
 				get_remote_mods,
-				get_remote_games,
 				open_mod_loader_folder,
 				refresh_game,
 				open_logs_folder,
@@ -592,7 +574,6 @@ fn main() {
 				.build(),
 		)
 		.manage(AppState {
-			remote_games: Mutex::default(),
 			mod_loaders: Mutex::default(),
 			local_mods: Mutex::default(),
 			remote_mods: Mutex::default(),
@@ -619,21 +600,4 @@ fn main() {
 			windows::error_dialog(&error.to_string());
 			// TODO handle Linux.
 		});
-
-	// match types_result {
-	// 	Ok(types) => {
-	// 		#[cfg(debug_assertions)]
-	// 		if let Err(err) = tauri_specta::ts::export_with_cfg(
-	// 			types,
-	// 			specta::ts::ExportConfiguration::default()
-	// 				.bigint(specta::ts::BigIntExportBehavior::BigInt),
-	// 			"../frontend/api/bindings.ts",
-	// 		) {
-	// 			error!("Failed to generate TypeScript bindings: {err}");
-	// 		}
-	// 	}
-	// 	Err(err) => {
-	// 		error!("Failed to generate api bindings: {err}");
-	// 	}
-	// }
 }
