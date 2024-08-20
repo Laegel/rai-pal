@@ -138,6 +138,9 @@ pub enum Error {
 
 	#[error("Provider ID {0} is invalid in this platform.")]
 	InvalidProviderId(String),
+
+	#[error("Unknown enum variant: {0}")]
+	UnknownEnumVariant(String),
 }
 
 impl serde::Serialize for Error {

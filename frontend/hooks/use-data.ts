@@ -11,7 +11,6 @@ export const providerDataAtom = atom<Partial<Record<ProviderId, ProviderData>>>(
 
 export const [modLoadersAtom, useModLoadersSubscription] = dataSubscription(
 	events.syncModLoaders,
-	{},
 );
 
 export const [localModsAtom, useLocalModsSubscription] = dataSubscription(

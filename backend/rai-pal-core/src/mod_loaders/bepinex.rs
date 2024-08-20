@@ -7,7 +7,7 @@ use std::{
 use rai_pal_proc_macros::serializable_struct;
 use zip::ZipArchive;
 
-use super::mod_loader::ModLoaderStatic;
+use super::mod_loader::{ModLoaderId, ModLoaderStatic};
 use crate::{
 	files::copy_dir_all,
 	game_engines::{
@@ -25,18 +25,16 @@ use crate::{
 #[serializable_struct]
 pub struct BepInEx {
 	pub data: ModLoaderData,
-	pub id: &'static str,
 }
 
 impl ModLoaderStatic for BepInEx {
-	const ID: &'static str = "bepinex";
+	const ID: &'static ModLoaderId = &ModLoaderId::BepInEx;
 
 	fn new(resources_path: &Path) -> Result<Self> {
 		Ok(Self {
-			id: Self::ID,
 			data: ModLoaderData {
-				id: Self::ID.to_string(),
-				path: resources_path.join(Self::ID),
+				id: *Self::ID,
+				path: resources_path.join(Self::ID.to_string()),
 				kind: ModKind::Installable,
 			},
 		})

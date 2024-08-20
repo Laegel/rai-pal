@@ -11,5 +11,16 @@ macro_rules! serializable_enum {
               write!(f, "{:?}", self)
           }
       }
+
+      impl std::str::FromStr for $enum_name {
+          type Err = $crate::result::Error;
+
+          fn from_str(s: &str) -> $crate::result::Result<Self> {
+              match s {
+                  $(stringify!($variant) => Ok(Self::$variant),)*
+                  _ => Err($crate::result::Error::UnknownEnumVariant(s.to_string())),
+              }
+          }
+      }
   };
 }

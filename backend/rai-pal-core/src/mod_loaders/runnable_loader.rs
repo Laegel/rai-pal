@@ -6,7 +6,7 @@ use std::{
 use log::error;
 use rai_pal_proc_macros::serializable_struct;
 
-use super::mod_loader::{ModLoaderActions, ModLoaderData, ModLoaderStatic};
+use super::mod_loader::{ModLoaderActions, ModLoaderData, ModLoaderId, ModLoaderStatic};
 use crate::{
 	game_mod::CommonModData,
 	installed_game::InstalledGame,
@@ -33,7 +33,7 @@ serializable_enum!(RunnableParameter {
 });
 
 impl ModLoaderStatic for RunnableLoader {
-	const ID: &'static str = "runnable";
+	const ID: &'static ModLoaderId = &ModLoaderId::Runnable;
 
 	fn new(resources_path: &Path) -> Result<Self>
 	where
@@ -41,8 +41,8 @@ impl ModLoaderStatic for RunnableLoader {
 	{
 		Ok(Self {
 			data: ModLoaderData {
-				id: Self::ID.to_string(),
-				path: resources_path.join(Self::ID),
+				id: *Self::ID,
+				path: resources_path.join(Self::ID.to_string()),
 				kind: ModKind::Runnable,
 			},
 		})

@@ -11,6 +11,8 @@ use crate::{
 	result::Result,
 };
 
+use super::mod_loader::ModLoaderId;
+
 const URL_BASE: &str = "https://raicuparta.github.io/rai-pal-db/mod-db";
 
 // The repository over at github.com/Raicuparta/rai-pal-db can have multiple versions of the database.
@@ -63,7 +65,7 @@ pub struct ModGithubInfo {
 	pub runnable: Option<RunnableModData>,
 }
 
-pub async fn get(mod_loader_id: &str) -> Result<ModDatabase> {
+pub async fn get(mod_loader_id: &ModLoaderId) -> Result<ModDatabase> {
 	Ok(reqwest::get(format!(
 		"{URL_BASE}/{DATABASE_VERSION}/{mod_loader_id}.json"
 	))

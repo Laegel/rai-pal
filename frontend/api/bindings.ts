@@ -61,7 +61,7 @@ async getLocalMods() : Promise<Result<{ [key in string]: LocalMod }, Error>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getModLoaders() : Promise<Result<{ [key in string]: ModLoaderData }, Error>> {
+async getModLoaders() : Promise<Result<{ [key in ModLoaderId]: ModLoaderData }, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_mod_loaders") };
 } catch (e) {
@@ -141,7 +141,7 @@ async openModFolder(modId: string) : Promise<Result<null, Error>> {
     else return { status: "error", error: e  as any };
 }
 },
-async openModLoaderFolder(modLoaderId: string) : Promise<Result<null, Error>> {
+async openModLoaderFolder(modLoaderId: ModLoaderId) : Promise<Result<null, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("open_mod_loader_folder", { modLoaderId }) };
 } catch (e) {
@@ -286,7 +286,7 @@ syncRemoteMods: "sync-remote-mods"
 
 export type AppType = "Game" | "Demo"
 export type Architecture = "X64" | "X86"
-export type CommonModData = { id: string; engine: EngineBrand | null; unityBackend: UnityScriptingBackend | null; engineVersionRange: EngineVersionRange | null; loaderId: string }
+export type CommonModData = { id: string; engine: EngineBrand | null; unityBackend: UnityScriptingBackend | null; engineVersionRange: EngineVersionRange | null; loaderId: ModLoaderId }
 export type EngineBrand = "Unity" | "Unreal" | "Godot" | "GameMaker"
 export type EngineVersion = { numbers: EngineVersionNumbers; suffix: string | null; display: string }
 export type EngineVersionNumbers = { major: number; minor: number | null; patch: number | null }
@@ -305,7 +305,8 @@ export type LocalModData = { path: string; manifest: Manifest | null }
 export type Manifest = { title: string | null; version: string; runnable: RunnableModData | null; engine: EngineBrand | null; engineVersionRange: EngineVersionRange | null; unityBackend: UnityScriptingBackend | null }
 export type ModDownload = { id: string; url: string; root: string | null; runnable: RunnableModData | null }
 export type ModKind = "Installable" | "Runnable"
-export type ModLoaderData = { id: string; path: string; kind: ModKind }
+export type ModLoaderData = { id: ModLoaderId; path: string; kind: ModKind }
+export type ModLoaderId = "BepInEx" | "Runnable"
 export type OwnedGame = { globalId: string; providerGameId: string; provider: ProviderId; name: string; releaseDate: bigint | null; thumbnailUrl: string | null; gameMode: GameMode | null; appType: AppType | null; providerCommands: { [key in ProviderCommandAction]: ProviderCommand } }
 export type ProviderCommand = { String: string } | { Path: [string, string[]] }
 export type ProviderCommandAction = "Install" | "ShowInLibrary" | "ShowInStore" | "Start" | "OpenInBrowser"
@@ -317,7 +318,7 @@ export type RemoteModData = { title: string; deprecated: boolean; author: string
 export type RunnableModData = { path: string; args: string[] }
 export type SelectInstalledGame = string
 export type SyncLocalMods = { [key in string]: LocalMod }
-export type SyncModLoaders = { [key in string]: ModLoaderData }
+export type SyncModLoaders = { [key in ModLoaderId]: ModLoaderData }
 export type SyncRemoteMods = { [key in string]: RemoteMod }
 export type UnityScriptingBackend = "Il2Cpp" | "Mono"
 

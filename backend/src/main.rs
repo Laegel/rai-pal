@@ -12,7 +12,7 @@ use events::EventEmitter;
 use rai_pal_core::installed_game::InstalledGame;
 use rai_pal_core::local_mod::{self, LocalMod};
 use rai_pal_core::maps::TryGettable;
-use rai_pal_core::mod_loaders::mod_loader::{self, ModLoaderActions};
+use rai_pal_core::mod_loaders::mod_loader::{self, ModLoaderActions, ModLoaderId};
 use rai_pal_core::owned_game::OwnedGame;
 use rai_pal_core::paths::{self, normalize_path};
 use rai_pal_core::providers::provider::ProviderId;
@@ -93,11 +93,11 @@ async fn open_mod_folder(mod_id: &str, handle: AppHandle) -> Result {
 
 #[tauri::command]
 #[specta::specta]
-async fn open_mod_loader_folder(mod_loader_id: &str, handle: AppHandle) -> Result {
+async fn open_mod_loader_folder(mod_loader_id: ModLoaderId, handle: AppHandle) -> Result {
 	Ok(handle
 		.app_state()
 		.mod_loaders
-		.try_get(mod_loader_id)?
+		.try_get(&mod_loader_id)?
 		.open_folder()?)
 }
 
